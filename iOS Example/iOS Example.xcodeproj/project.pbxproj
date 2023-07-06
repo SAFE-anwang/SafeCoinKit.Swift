@@ -10,8 +10,8 @@
 		2FA5D47CFAEB8DB143F27645 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA5DACF4DE83AC5FE512D28 /* Extensions.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		6B7C7E6428EC00770053F11A /* Cuckoo in Frameworks */ = {isa = PBXBuildFile; productRef = 6B7C7E6328EC00770053F11A /* Cuckoo */; };
-		6B7C7E6628EC02540053F11A /* DashKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6B7C7E6528EC02540053F11A /* DashKit */; };
 		6BADE51A1F50100CE1EA2E77 /* libPods-DashKitTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 68064D100A6B89360F422ACD /* libPods-DashKitTests.a */; };
+		BD7276E62A56FCA90061DA61 /* SafeCoinKit in Frameworks */ = {isa = PBXBuildFile; productRef = BD7276E52A56FCA90061DA61 /* SafeCoinKit */; };
 		D36AAA9623A2125D0065B32B /* DashAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7D23A2125D0065B32B /* DashAdapter.swift */; };
 		D36AAA9823A2125E0065B32B /* BaseAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */; };
 		D36AAA9923A2125E0065B32B /* SendController.xib in Resources */ = {isa = PBXBuildFile; fileRef = D36AAA8123A2125D0065B32B /* SendController.xib */; };
@@ -63,6 +63,7 @@
 		752AEC72EEED42E4B36FB86A /* libPods-BitcoinCashKitTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BitcoinCashKitTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8533447FA6137FF0AD1A8653 /* libPods-BitcoinKitExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BitcoinKitExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AEBF785A9D87D74223787CA0 /* libPods-HodlerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-HodlerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD7276E42A56FC570061DA61 /* SafeCoinKit.Swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SafeCoinKit.Swift; path = ..; sourceTree = "<group>"; };
 		D36AAA7D23A2125D0065B32B /* DashAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DashAdapter.swift; sourceTree = "<group>"; };
 		D36AAA7F23A2125D0065B32B /* BaseAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseAdapter.swift; sourceTree = "<group>"; };
 		D36AAA8123A2125D0065B32B /* SendController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SendController.xib; sourceTree = "<group>"; };
@@ -114,7 +115,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6B7C7E6628EC02540053F11A /* DashKit in Frameworks */,
+				BD7276E62A56FCA90061DA61 /* SafeCoinKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,6 +147,7 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
+				BD7276E32A56FC570061DA61 /* Packages */,
 				607FACD21AFB9204008FA782 /* Sources */,
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
@@ -204,6 +206,14 @@
 				D39EA3C823A124A600FF23B7 /* BitcoinCoreTests.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BD7276E32A56FC570061DA61 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				BD7276E42A56FC570061DA61 /* SafeCoinKit.Swift */,
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 		C2139571C0F6E4D2D26ED0AD /* Frameworks */ = {
@@ -343,7 +353,7 @@
 			);
 			name = "iOS Example";
 			packageProductDependencies = (
-				6B7C7E6528EC02540053F11A /* DashKit */,
+				BD7276E52A56FCA90061DA61 /* SafeCoinKit */,
 			);
 			productName = DashKit;
 			productReference = 607FACD01AFB9204008FA782 /* DashKit Demo.app */;
@@ -749,9 +759,9 @@
 			package = 6B7C7E6228EC00770053F11A /* XCRemoteSwiftPackageReference "Cuckoo" */;
 			productName = Cuckoo;
 		};
-		6B7C7E6528EC02540053F11A /* DashKit */ = {
+		BD7276E52A56FCA90061DA61 /* SafeCoinKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = DashKit;
+			productName = SafeCoinKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

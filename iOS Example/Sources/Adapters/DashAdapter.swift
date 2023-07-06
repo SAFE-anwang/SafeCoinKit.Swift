@@ -1,6 +1,6 @@
 import Foundation
 import Combine
-import DashKit
+import SafeCoinKit
 import BitcoinCore
 import HsToolKit
 import HdWalletKit

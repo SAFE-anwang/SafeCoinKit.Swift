@@ -5,7 +5,7 @@ import BigInt
 import HsToolKit
 
 public class Kit: AbstractKit {
-    private static let name = "DashKit"
+    private static let name = "SafeCoinKit"
     private static let heightInterval = 24                                      // Blocks count in window for calculating difficulty
     private static let targetSpacing = 150                                      // Time to mining one block ( 2.5 min. Dash )
     private static let maxTargetBits = 0x1e0fffff                               // Initially and max. target difficulty for blocks ( Dash )
@@ -38,10 +38,11 @@ public class Kit: AbstractKit {
         switch networkType {
         case .mainNet:
             network = MainNet()
-            initialSyncApiUrl = "https://insight.dash.org/insight-api"
+            initialSyncApiUrl = "https://chain.anwang.org/insight-api-safe"
+
         case .testNet:
             network = TestNet()
-            initialSyncApiUrl = "http://dash-testnet.horizontalsystems.xyz/apg"
+            initialSyncApiUrl = ""
         }
 
         let logger = logger ?? Logger(minLogLevel: .verbose)
@@ -52,7 +53,7 @@ public class Kit: AbstractKit {
         let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
-        let paymentAddressParser = PaymentAddressParser(validScheme: "dash", removeScheme: true)
+        let paymentAddressParser = PaymentAddressParser(validScheme: "safe", removeScheme: true)
 
         let singleHasher = SingleHasher()   // Use single sha256 for hash
         let doubleShaHasher = DoubleShaHasher()     // Use doubleSha256 for hash
@@ -67,19 +68,19 @@ public class Kit: AbstractKit {
         let difficultyEncoder = DifficultyEncoder()
 
         let blockValidatorSet = BlockValidatorSet()
-        blockValidatorSet.add(blockValidator: ProofOfWorkValidator(difficultyEncoder: difficultyEncoder))
+        blockValidatorSet.add(blockValidator: SafeSPOSBlockValidator(difficultyEncoder: difficultyEncoder))
 
         let blockValidatorChain = BlockValidatorChain()
-        let blockHelper = BlockValidatorHelper(storage: storage)
-
-        let targetTimespan = Kit.heightInterval * Kit.targetSpacing                 // Time to mining all 24 blocks in circle
-        switch networkType {
-        case .mainNet:
-            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: Kit.heightInterval , targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 68589))
-        case .testNet:
-            blockValidatorChain.add(blockValidator: DarkGravityWaveTestNetValidator(difficultyEncoder: difficultyEncoder, targetSpacing: Kit.targetSpacing, targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 4002))
-            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: Kit.heightInterval, targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 4002))
-        }
+//        let blockHelper = BlockValidatorHelper(storage: storage)
+//
+//        let targetTimespan = Kit.heightInterval * Kit.targetSpacing                 // Time to mining all 24 blocks in circle
+//        switch networkType {
+//        case .mainNet:
+//            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: Kit.heightInterval , targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 68589))
+//        case .testNet:
+//            blockValidatorChain.add(blockValidator: DarkGravityWaveTestNetValidator(difficultyEncoder: difficultyEncoder, targetSpacing: Kit.targetSpacing, targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 4002))
+//            blockValidatorChain.add(blockValidator: DarkGravityWaveValidator(encoder: difficultyEncoder, blockHelper: blockHelper, heightInterval: Kit.heightInterval, targetTimeSpan: targetTimespan, maxTargetBits: Kit.maxTargetBits, powDGWHeight: 4002))
+//        }
 
         blockValidatorSet.add(blockValidator: blockValidatorChain)
 
@@ -169,12 +170,13 @@ public class Kit: AbstractKit {
         transactionInfos.compactMap { $0 as? DashTransactionInfo }
     }
 
-    public override func send(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData]) throws -> FullTransaction {
-        try super.send(to: address, value: value, feeRate: feeRate, sortType: sortType)
+    public override func sendSafe(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData], unlockedHeight: Int?, reverseHex: String?) throws -> FullTransaction {
+        try super.sendSafe(to: address, value: value, feeRate: feeRate, sortType: sortType, pluginData: pluginData, unlockedHeight: unlockedHeight, reverseHex: reverseHex)
     }
 
     public func transactions(fromUid: String? = nil, type: TransactionFilterType?, limit: Int? = nil) -> [DashTransactionInfo] {
         cast(transactionInfos: super.transactions(fromUid: fromUid, type: type, limit: limit))
+        //super.transactions(fromUid: fromUid, type: type, limit: limit).map { self.cast(transactionInfos: $0) }
     }
 
     override public func transaction(hash: String) -> DashTransactionInfo? {

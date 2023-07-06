@@ -21,7 +21,7 @@ struct CoinbaseTransaction {
     }
 
     init(byteStream: ByteStream) {
-        transaction = TransactionSerializer.deserialize(byteStream: byteStream)
+        transaction = TransactionSerializer.deserialize(byteStream: byteStream, isSafe: true)
         let size = byteStream.read(VarInt.self)
         coinbaseTransactionSize = size.data
         version = byteStream.read(UInt16.self)

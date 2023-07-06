@@ -3,17 +3,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "DashKit",
+    name: "SafeCoinKit",
     platforms: [
         .iOS(.v13),
     ],
     products: [
         .library(
-            name: "DashKit",
-            targets: ["DashKit"]),
+            name: "SafeCoinKit",
+            targets: ["SafeCoinKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/horizontalsystems/BitcoinCore.Swift.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/SAFE-anwang/BitcoinCore.Swift.git", .upToNextMajor(from: "2.0.0")),
         .package(url: "https://github.com/horizontalsystems/DashCrypto.Swift.git", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/horizontalsystems/HdWalletKit.Swift.git", .upToNextMajor(from: "1.2.1")),
         .package(url: "https://github.com/horizontalsystems/HsToolKit.Swift.git", .upToNextMajor(from: "2.0.0")),
@@ -24,7 +24,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "DashKit",
+            name: "SafeCoinKit",
             dependencies: [
                 "BigInt",
                 .product(name: "BitcoinCore", package: "BitcoinCore.Swift"),

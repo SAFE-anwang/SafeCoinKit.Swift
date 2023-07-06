@@ -1,6 +1,6 @@
 import Foundation
-import Combine
 import BitcoinCore
+import Combine
 
 class MasternodeListSyncer: IMasternodeListSyncer {
     private var cancellables = Set<AnyCancellable>()
