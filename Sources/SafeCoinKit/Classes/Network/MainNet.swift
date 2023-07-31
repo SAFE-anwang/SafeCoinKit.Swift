@@ -36,11 +36,11 @@ public class MainNet: INetwork {
     public let dustRelayTxFee = 1000
     
     public var bip44Checkpoint: Checkpoint {
-        try! getCheckpoint(bundleName: bundleName, network: .main, blockType: .bip44)
+        try! MainNet.getCheckpoint(bundleName: bundleName, network: .main, blockType: .bip44)
     }
 
     public var lastCheckpoint: Checkpoint {
-        try! getCheckpoint(bundleName: bundleName, network: .main, blockType: .last)
+        try! MainNet.getCheckpoint(bundleName: bundleName, network: .main, blockType: .last)
     }
 
     private var connectFailedIp = [String]()
@@ -94,12 +94,12 @@ public class MainNet: INetwork {
 
 extension MainNet {
     
-    public func getCheckpoint(date: CheckpointData.FallbackDate? = nil) throws -> Checkpoint {
-        try getCheckpoint(bundleName: bundleName, network: .main, blockType: .bip44, fallbackDate: date)
+    public static func getCheckpoint(date: CheckpointData.FallbackDate? = nil) throws -> Checkpoint {
+        try getCheckpoint(bundleName: "safe", network: .main, blockType: .bip44, fallbackDate: date)
     }
     
     // 参考 CheckpointData init 方法实现
-    private func getCheckpoint(bundleName: String, network: CheckpointData.Network, blockType: CheckpointData.BlockType, fallbackDate: CheckpointData.FallbackDate? = nil) throws -> Checkpoint {
+    private static func getCheckpoint(bundleName: String, network: CheckpointData.Network, blockType: CheckpointData.BlockType, fallbackDate: CheckpointData.FallbackDate? = nil) throws -> Checkpoint {
         var checkpoint: String?
         if let fallbackDate {
             checkpoint = fallbackDate.rawValue
@@ -133,14 +133,14 @@ extension MainNet {
             additionalBlocks.append(additionalData)
         }
         
-        let pBlock = try readBlock(data: block)
+        let pBlock = try MainNet.readBlock(data: block)
         let pAdditionalBlocks = try additionalBlocks.map { try readBlock(data: $0) }
         
         return Checkpoint(block: pBlock, additionalBlocks: pAdditionalBlocks)
     }
     
     ///照搬 Checkpoint类中同名方法
-    private func readBlock(data: Data) throws -> Block {
+    private static func readBlock(data: Data) throws -> Block {
         let byteStream = ByteStream(data)
 
         let version = Int(byteStream.read(Int32.self))
