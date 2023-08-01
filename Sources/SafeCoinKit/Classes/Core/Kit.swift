@@ -53,7 +53,7 @@ public class Kit: AbstractKit {
         let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
         self.storage = storage
 
-        let paymentAddressParser = PaymentAddressParser(validScheme: "safe", removeScheme: true)
+        let paymentAddressParser = PaymentAddressParser(validScheme: "Safe", removeScheme: true)
 
         let singleHasher = SingleHasher()   // Use single sha256 for hash
         let doubleShaHasher = DoubleShaHasher()     // Use doubleSha256 for hash

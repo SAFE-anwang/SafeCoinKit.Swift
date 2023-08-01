@@ -52,14 +52,4 @@ extension MainSafeNetService {
     }
 }
 
-//extension MainSafeNetService: IApiMapper {
-//
-//    public func map(statusCode: Int, data: Any?) throws -> [String] {
-//        guard let array = data as? [String] else {
-//            throw NetworkManager.RequestError.invalidResponse(statusCode: statusCode, data: data)
-//        }
-//        return array
-//    }
-//
-//}
 
