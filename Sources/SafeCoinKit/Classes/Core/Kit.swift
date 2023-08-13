@@ -19,7 +19,8 @@ public class Kit: AbstractKit {
     private var masternodeSyncer: MasternodeListSyncer?
     private var instantSend: InstantSend?
     private let dashTransactionInfoConverter: ITransactionInfoConverter
-
+    private var confirmedUnspentOutputProvider: ConfirmedUnspentOutputProvider
+    
     public convenience init(seed: Data, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let masterPrivateKey = HDPrivateKey(seed: seed, xPrivKey: Purpose.bip44.rawValue)
 
@@ -71,6 +72,9 @@ public class Kit: AbstractKit {
         blockValidatorSet.add(blockValidator: SafeSPOSBlockValidator(difficultyEncoder: difficultyEncoder))
 
         let blockValidatorChain = BlockValidatorChain()
+        
+        confirmedUnspentOutputProvider = ConfirmedUnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
+
 //        let blockHelper = BlockValidatorHelper(storage: storage)
 //
 //        let targetTimespan = Kit.heightInterval * Kit.targetSpacing                 // Time to mining all 24 blocks in circle
@@ -138,7 +142,6 @@ public class Kit: AbstractKit {
         self.masternodeSyncer = masternodeSyncer
 
         let calculator = TransactionSizeCalculator()
-        let confirmedUnspentOutputProvider = ConfirmedUnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
         let dustCalculator = DustCalculator(dustRelayTxFee: network.dustRelayTxFee, sizeCalculator: calculator)
 
         bitcoinCore.prepend(unspentOutputSelector: UnspentOutputSelector(calculator: calculator, provider: confirmedUnspentOutputProvider, dustCalculator: dustCalculator))
@@ -182,7 +185,10 @@ public class Kit: AbstractKit {
     override public func transaction(hash: String) -> DashTransactionInfo? {
         super.transaction(hash: hash) as? DashTransactionInfo
     }
-
+    
+    public func getConfirmedUnspentOutputProvider() -> ConfirmedUnspentOutputProvider {
+        return confirmedUnspentOutputProvider
+    }
 }
 
 extension Kit: BitcoinCoreDelegate {
