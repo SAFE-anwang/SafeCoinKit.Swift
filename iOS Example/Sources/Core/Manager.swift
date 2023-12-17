@@ -1,11 +1,11 @@
-import Foundation
-import Combine
 import BitcoinCore
+import Combine
+import Foundation
 import HsToolKit
 
 class Manager {
     static let shared = Manager()
-    private static let syncModes: [BitcoinCore.SyncMode] = [.full, .api, .newWallet]
+    private static let syncModes: [BitcoinCore.SyncMode] = [.full, .api, .blockchair(key: "")]
 
     private let keyWords = "mnemonic_words"
     private let syncModeKey = "syncMode"
@@ -80,5 +80,4 @@ class Manager {
     private func clearKits() {
         DashAdapter.clear()
     }
-
 }

@@ -1,5 +1,5 @@
-import Foundation
 import BitcoinCore
+import Foundation
 import HsCryptoKit
 import HsExtensions
 
@@ -20,7 +20,7 @@ class QuorumParser: IQuorumParser {
 
         var quorumIndexData: Data?
         var quorumIndex: UInt16?
-        if version == 2 { // read v2 quorumIndex
+        if version == 2 || version == 4 { // read v2 quorumIndex
             let indexData = byteStream.read(Data.self, count: 2)
             quorumIndex = indexData.hs.to(type: UInt16.self).littleEndian
             quorumIndexData = indexData
@@ -41,23 +41,21 @@ class QuorumParser: IQuorumParser {
         let quorumSig = byteStream.read(Data.self, count: 96)
         let sig = byteStream.read(Data.self, count: 96)
 
-
         var data = versionData +
-                type +
-                quorumHash
+            type +
+            quorumHash
         if let index = quorumIndexData {
             data += index
         }
         data += signerSizeVarInt.data +
-                signers +
-                validMemberSizeVarInt.data +
-                members +
-                quorumPublicKey +
-                quorumVvecHash +
-                quorumSig +
-                sig
+            signers +
+            validMemberSizeVarInt.data +
+            members +
+            quorumPublicKey +
+            quorumVvecHash +
+            quorumSig +
+            sig
         let hash = hasher.hash(data: data)
         return Quorum(hash: hash, version: version, type: type, quorumHash: quorumHash, typeWithQuorumHash: typeWithQuorumHash, quorumIndex: quorumIndex, signers: signers, validMembers: members, quorumPublicKey: quorumPublicKey, quorumVvecHash: quorumVvecHash, quorumSig: quorumSig, sig: sig)
     }
-
 }

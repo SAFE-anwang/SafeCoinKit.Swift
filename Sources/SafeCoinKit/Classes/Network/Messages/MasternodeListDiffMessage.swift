@@ -1,5 +1,5 @@
-import Foundation
 import BitcoinCore
+import Foundation
 
 struct MasternodeListDiffMessage: IMessage {
     let baseBlockHash: Data
@@ -10,6 +10,7 @@ struct MasternodeListDiffMessage: IMessage {
     let merkleFlagsCount: UInt32
     let merkleFlags: Data
     let cbTx: CoinbaseTransaction
+    let nVersion: UInt16
     let deletedMNsCount: UInt32
     let deletedMNs: [Data]
     let mnListCount: UInt32
@@ -18,7 +19,6 @@ struct MasternodeListDiffMessage: IMessage {
     let quorumList: [Quorum]
 
     var description: String {
-        return "\(baseBlockHash) \(blockHash)"
+        "\(baseBlockHash) \(blockHash)"
     }
-
 }
