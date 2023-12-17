@@ -35,6 +35,7 @@ class Masternode: Record {
     }
 
     required init(row: Row) throws {
+
         nVersion = row[Columns.nVersion]
         proRegTxHash = row[Columns.proRegTxHash]
         confirmedHash = row[Columns.confirmedHash]
