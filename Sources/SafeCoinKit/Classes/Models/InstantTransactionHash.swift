@@ -12,13 +12,13 @@ class InstantTransactionHash: Record {
         case txHash
     }
 
-    required init(row: Row) throws {
+    required init(row: Row) {
         txHash = row[Columns.txHash]
 
-        try super.init(row: row)
+        super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) throws {
+    override func encode(to container: inout PersistenceContainer) {
         container[Columns.txHash] = txHash
     }
 

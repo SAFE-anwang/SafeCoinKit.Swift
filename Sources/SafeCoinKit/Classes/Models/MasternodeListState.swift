@@ -17,13 +17,13 @@ class MasternodeListState: Record {
         case baseBlockHash
     }
 
-    required init(row: Row) throws {
+    required init(row: Row) {
         baseBlockHash = row[Columns.baseBlockHash]
 
-        try super.init(row: row)
+        super.init(row: row)
     }
 
-    override func encode(to container: inout PersistenceContainer) throws {
+    override func encode(to container: inout PersistenceContainer) {
         container[Columns.primaryKey] = primaryKey
         container[Columns.baseBlockHash] = baseBlockHash
     }
