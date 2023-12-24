@@ -15,6 +15,7 @@ public class Kit: AbstractKit {
     weak public var delegate: DashKitDelegate?
 
     private let storage: IDashStorage
+    public var safeMainNet: INetwork?
 
     private var masternodeSyncer: MasternodeListSyncer?
     private var instantSend: InstantSend?
@@ -39,6 +40,7 @@ public class Kit: AbstractKit {
         switch networkType {
         case .mainNet:
             network = MainNet()
+            safeMainNet = network
             initialSyncApiUrl = "https://chain.anwang.org/insight-api-safe"
 
         case .testNet:

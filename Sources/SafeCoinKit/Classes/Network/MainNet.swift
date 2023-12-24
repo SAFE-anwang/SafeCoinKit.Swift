@@ -7,7 +7,7 @@ import Checkpoints
 public class MainNet: INetwork {
     public var blockchairChainId: String = ""
     
-    public let protocolVersion: Int32 = 70228//70210
+    public let protocolVersion: Int32 = 70210
 
     public let bundleName = "Safe"
 
