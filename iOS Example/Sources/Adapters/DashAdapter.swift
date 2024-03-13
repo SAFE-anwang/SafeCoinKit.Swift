@@ -17,10 +17,6 @@ class DashAdapter: BaseAdapter {
 
         super.init(name: "Safe", coinCode: "SafeCoin", abstractKit: dashKit)
         dashKit.delegate = self
-        
-        let lockUxto = dashKit.getConfirmedUnspentOutputProvider().getLockUxto()
-        syncLockedRecordItems(items: lockUxto)
-        
     }
 
     override func transactions(fromUid: String?, type: TransactionFilterType? = nil, limit: Int) -> [TransactionRecord] {
@@ -41,31 +37,6 @@ class DashAdapter: BaseAdapter {
 
     class func clear() {
         try? Kit.clear()
-    }
-    
-    func syncLockedRecordItems(items: [UnspentOutput]) {
-        
-        var viewItems = [ViewItem]()
-        
-        for item in items {
-            let lastHeight: Int = dashKit.lastBlockInfo?.height ?? 0
-            var height: Int = 0
-
-            if let h = item.blockHeight {
-                height = h
-            }else {
-                 height = lastHeight
-            }
-            if let unlockedHeight = item.output.unlockedHeight {
-                let lockAmount = "\((Decimal(item.output.value) / coinRate).formattedAmount)"
-                let lockMonth = (unlockedHeight - height) / 86300
-                let isLocked = lastHeight <= unlockedHeight
-                let viewItem = ViewItem(height: height, lockAmount: lockAmount, lockMonth: lockMonth, isLocked: isLocked, address: item.output.address ?? "")
-                viewItems.append(viewItem)
-            }
-
-        }
-        print("-------------->:\(viewItems)")
     }
 }
 
@@ -91,10 +62,3 @@ extension DashAdapter: DashKitDelegate {
     }
 }
 
-struct ViewItem {
-    let height: Int
-    let lockAmount: String
-    let lockMonth: Int
-    let isLocked: Bool
-    let address: String
-}
