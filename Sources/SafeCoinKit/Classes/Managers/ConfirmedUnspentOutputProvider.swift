@@ -1,6 +1,6 @@
 import BitcoinCore
 
-public class ConfirmedUnspentOutputProvider {
+class ConfirmedUnspentOutputProvider {
     let storage: IDashStorage
     let confirmationsThreshold: Int
 
@@ -10,15 +10,17 @@ public class ConfirmedUnspentOutputProvider {
     }
 }
 
-
 extension ConfirmedUnspentOutputProvider: IUnspentOutputProvider {
-
-    public var spendableUtxo: [UnspentOutput] {
+    var spendableUtxo: [UnspentOutput] {
         let lastBlockHeight = storage.lastBlock?.height ?? 0
 
         // Output must have a public key, that is, must belong to the user
         return storage.unspentOutputs()
-                .filter({ isOutputConfirmed(unspentOutput: $0, lastBlockHeight: lastBlockHeight) })
+            .filter { isOutputConfirmed(unspentOutput: $0, lastBlockHeight: lastBlockHeight) }
+    }
+
+    var confirmedSpendableUtxo: [UnspentOutput] {
+        spendableUtxo
     }
 
     private func isOutputConfirmed(unspentOutput: UnspentOutput, lastBlockHeight: Int) -> Bool {

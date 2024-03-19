@@ -45,8 +45,8 @@ public class Kit: AbstractKit {
         case .mainNet:
             let apiTransactionProviderUrl = "https://chain.anwang.org/insight-api-safe"
 
-            if case let .blockchair(key) = syncMode {
-                let blockchairApi = BlockchairApi(secretKey: key, chainId: network.blockchairChainId, logger: logger)
+            if case .blockchair = syncMode {
+                let blockchairApi = BlockchairApi(chainId: network.blockchairChainId, logger: logger)
                 let blockchairBlockHashFetcher = BlockchairBlockHashFetcher(blockchairApi: blockchairApi)
                 let blockchairProvider = BlockchairTransactionProvider(blockchairApi: blockchairApi, blockHashFetcher: blockchairBlockHashFetcher)
                 let insightApiProvider = InsightApi(url: apiTransactionProviderUrl, logger: logger)
@@ -216,8 +216,8 @@ public class Kit: AbstractKit {
         transactionInfos.compactMap { $0 as? DashTransactionInfo }
     }
 
-    public override func sendSafe(to address: String, value: Int, feeRate: Int, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData], unlockedHeight: Int?, reverseHex: String?) throws -> FullTransaction {
-        try super.sendSafe(to: address, value: value, feeRate: feeRate, sortType: sortType, pluginData: pluginData, unlockedHeight: unlockedHeight, reverseHex: reverseHex)
+    public override func sendSafe(to address: String, memo: String?, value: Int, feeRate: Int, sortType: TransactionDataSortType, rbfEnabled: Bool, unspentOutputs: [UnspentOutputInfo]? = nil, pluginData: [UInt8: IPluginData] = [:], unlockedHeight: Int?, reverseHex: String?) throws -> FullTransaction {
+        try super.sendSafe(to: address, memo: memo, value: value, feeRate: feeRate, sortType: sortType, rbfEnabled: rbfEnabled, unspentOutputs: unspentOutputs, pluginData: pluginData, unlockedHeight: unlockedHeight, reverseHex: reverseHex)
     }
 
     public func transactions(fromUid: String? = nil, type: TransactionFilterType?, limit: Int? = nil) -> [DashTransactionInfo] {
