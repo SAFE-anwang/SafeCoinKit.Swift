@@ -67,7 +67,7 @@ public class MainNet: INetwork {
     }
     
     public func markedFailed(ip: String?) {
-        if let _ip = ip {
+        if let _ip = ip, dnsSeeds.contains(_ip) {
             connectFailedIp.append(_ip)
         }
         

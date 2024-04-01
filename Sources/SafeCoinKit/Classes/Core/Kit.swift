@@ -31,9 +31,10 @@ public class Kit: AbstractKit {
     private var masternodeSyncer: MasternodeListSyncer?
     private var instantSend: InstantSend?
     private let dashTransactionInfoConverter: ITransactionInfoConverter
-
+    private let confirmedUnspentOutputProvider: ConfirmedUnspentOutputProvider
     private init(extendedKey: HDExtendedKey?, watchAddressPublicKey: WatchAddressPublicKey?, walletId: String, syncMode: BitcoinCore.SyncMode = .api, networkType: NetworkType = .mainNet, confirmationsThreshold: Int = 6, logger: Logger?) throws {
         let network = networkType.network
+         safeMainNet = network
         let logger = logger ?? Logger(minLogLevel: .verbose)
         let databaseFilePath = try DirectoryHelper.directoryURL(for: Kit.name).appendingPathComponent(Kit.databaseFileName(walletId: walletId, networkType: networkType, syncMode: syncMode)).path
         let storage = DashGrdbStorage(databaseFilePath: databaseFilePath)
@@ -79,7 +80,7 @@ public class Kit: AbstractKit {
 
         let blockValidatorChain = BlockValidatorChain()
         
-        let confirmedUnspentOutputProvider = ConfirmedUnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
+        confirmedUnspentOutputProvider = ConfirmedUnspentOutputProvider(storage: storage, confirmationsThreshold: confirmationsThreshold)
 
 //        let blockHelper = BlockValidatorHelper(storage: storage)
 //
@@ -228,6 +229,11 @@ public class Kit: AbstractKit {
     override public func transaction(hash: String) -> DashTransactionInfo? {
         super.transaction(hash: hash) as? DashTransactionInfo
     }
+    
+    public func getConfirmedUnspentOutputProvider() -> ConfirmedUnspentOutputProvider {
+        return confirmedUnspentOutputProvider
+    }
+
 }
 
 extension Kit: BitcoinCoreDelegate {
