@@ -23,7 +23,7 @@ public class Kit: AbstractKit {
         }
     }
 
-    public weak var delegate: DashKitDelegate?
+    public weak var delegate: SafeCoinKitDelegate?
 
     private let storage: IDashStorage
     public var safeMainNet: INetwork?
