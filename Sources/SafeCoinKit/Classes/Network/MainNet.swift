@@ -25,15 +25,9 @@ public class MainNet: INetwork {
     public let sigHash: SigHashType = .bitcoinAll
     public var syncableFromApi: Bool = true
     public var dnsSeeds =
-                ["120.78.227.96",
-                 "114.215.31.37",
-                 "47.96.254.235",
-                 "106.14.66.206",
-                 "47.52.9.168",
-                 "47.75.17.223",
-                 "47.88.247.232",
-                 "47.89.208.160",
-                 "47.74.13.245"]
+                ["45.118.133.218",
+                 "172.105.122.90",
+                 "172.105.122.121",]
 
     public let dustRelayTxFee = 1000
     
