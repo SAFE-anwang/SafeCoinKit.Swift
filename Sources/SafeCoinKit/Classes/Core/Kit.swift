@@ -217,13 +217,8 @@ public class Kit: AbstractKit {
         transactionInfos.compactMap { $0 as? DashTransactionInfo }
     }
 
-    public override func sendSafe(to address: String, memo: String?, value: Int, feeRate: Int, sortType: TransactionDataSortType, rbfEnabled: Bool, unspentOutputs: [UnspentOutputInfo]? = nil, pluginData: [UInt8: IPluginData] = [:], unlockedHeight: Int?, reverseHex: String?) throws -> FullTransaction {
-        try super.sendSafe(to: address, memo: memo, value: value, feeRate: feeRate, sortType: sortType, rbfEnabled: rbfEnabled, unspentOutputs: unspentOutputs, pluginData: pluginData, unlockedHeight: unlockedHeight, reverseHex: reverseHex)
-    }
-
-    public func transactions(fromUid: String? = nil, type: TransactionFilterType?, limit: Int? = nil) -> [DashTransactionInfo] {
-        cast(transactionInfos: super.transactions(fromUid: fromUid, type: type, limit: limit))
-        //super.transactions(fromUid: fromUid, type: type, limit: limit).map { self.cast(transactionInfos: $0) }
+    public func transactions(fromUid: String? = nil, type: TransactionFilterType?, descending: Bool, limit: Int? = nil) -> [DashTransactionInfo] {
+        cast(transactionInfos: super.transactions(fromUid: fromUid, type: type, descending: descending, limit: limit))
     }
 
     override public func transaction(hash: String) -> DashTransactionInfo? {
@@ -275,12 +270,41 @@ extension Kit: IInstantTransactionDelegate {
     }
 }
 
-extension Kit {
-    public static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
+public extension Kit {
+    static func clear(exceptFor walletIdsToExclude: [String] = []) throws {
         try DirectoryHelper.removeAll(inDirectory: Kit.name, except: walletIdsToExclude)
     }
 
     private static func databaseFileName(walletId: String, networkType: NetworkType, syncMode: BitcoinCore.SyncMode) -> String {
         "\(walletId)-\(networkType.rawValue)-\(syncMode)"
+    }
+
+    private static func addressConverter(network: INetwork) -> AddressConverterChain {
+        let addressConverter = AddressConverterChain()
+        addressConverter.prepend(addressConverter: Base58AddressConverter(addressVersion: network.pubKeyHash, addressScriptVersion: network.scriptHash))
+
+        return addressConverter
+    }
+
+    static func firstAddress(seed: Data, networkType: NetworkType) throws -> Address {
+        let network = networkType.network
+
+        return try BitcoinCore.firstAddress(
+            seed: seed,
+            purpose: Purpose.bip44,
+            network: network,
+            addressCoverter: addressConverter(network: network)
+        )
+    }
+
+    static func firstAddress(extendedKey: HDExtendedKey, networkType: NetworkType) throws -> Address {
+        let network = networkType.network
+
+        return try BitcoinCore.firstAddress(
+            extendedKey: extendedKey,
+            purpose: Purpose.bip44,
+            network: network,
+            addressCoverter: addressConverter(network: network)
+        )
     }
 }
