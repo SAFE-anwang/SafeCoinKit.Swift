@@ -93,9 +93,11 @@ extension DashGrdbStorage: IDashStorage {
             }
         }
         set {
-            _ = try? dbPool.write { db in
-                try Masternode.deleteAll(db)
-                try newValue.forEach { try $0.insert(db) }
+            DispatchQueue.global().async {
+                _ = try? self.dbPool.write { db in
+                    try Masternode.deleteAll(db)
+                    try newValue.forEach { try $0.insert(db) }
+                }
             }
         }
     }
@@ -107,9 +109,11 @@ extension DashGrdbStorage: IDashStorage {
             }
         }
         set {
-            _ = try? dbPool.write { db in
-                try Quorum.deleteAll(db)
-                try newValue.forEach { try $0.insert(db) }
+            DispatchQueue.global().async {
+                _ = try? self.dbPool.write { db in
+                    try Quorum.deleteAll(db)
+                    try newValue.forEach { try $0.insert(db) }
+                }
             }
         }
     }
@@ -121,14 +125,16 @@ extension DashGrdbStorage: IDashStorage {
             }
         }
         set {
-            guard let newValue else {
-                _ = try? dbPool.write { db in
-                    try MasternodeListState.deleteAll(db)
+            DispatchQueue.global().async {
+                guard let newValue else {
+                    _ = try? self.dbPool.write { db in
+                        try MasternodeListState.deleteAll(db)
+                    }
+                    return
                 }
-                return
-            }
-            _ = try? dbPool.write { db in
-                try newValue.insert(db)
+                _ = try? self.dbPool.write { db in
+                    try newValue.insert(db)
+                }
             }
         }
     }
@@ -146,20 +152,36 @@ extension DashGrdbStorage: IDashStorage {
     }
 
     func add(instantTransactionHash: Data) {
-        _ = try? dbPool.write { db in
-            try InstantTransactionHash(txHash: instantTransactionHash).insert(db)
+        DispatchQueue.global().async {
+            _ = try? self.dbPool.write { db in
+                try InstantTransactionHash(txHash: instantTransactionHash).insert(db)
+            }
         }
     }
 
     func add(instantTransactionInput: InstantTransactionInput) {
-        _ = try? dbPool.write { db in
-            try instantTransactionInput.insert(db)
+        DispatchQueue.global().async {
+            _ = try? self.dbPool.write { db in
+                try instantTransactionInput.insert(db)
+            }
+        }
+    }
+
+    func add(instantTransactionInputs: [InstantTransactionInput]) {
+        DispatchQueue.global().async {
+            _ = try? self.dbPool.write { db in
+                for input in instantTransactionInputs {
+                    try input.insert(db)
+                }
+            }
         }
     }
 
     func removeInstantTransactionInputs(for txHash: Data) {
-        _ = try! dbPool.write { db in
-            try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).deleteAll(db)
+        DispatchQueue.global().async {
+            _ = try? self.dbPool.write { db in
+                try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).deleteAll(db)
+            }
         }
     }
 

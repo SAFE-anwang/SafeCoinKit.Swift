@@ -85,6 +85,7 @@ protocol IDashStorage {
     func add(instantTransactionHash: Data)
 
     func add(instantTransactionInput: InstantTransactionInput)
+    func add(instantTransactionInputs: [InstantTransactionInput])
     func removeInstantTransactionInputs(for txHash: Data)
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput]
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput?

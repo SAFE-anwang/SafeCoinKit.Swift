@@ -23,10 +23,10 @@ class InstantTransactionManager {
         var instantInputs = [InstantTransactionInput]()
         for input in inputs {
             let instantInput = instantSendFactory.instantTransactionInput(txHash: txHash, inputTxHash: input.previousOutputTxHash, voteCount: 0, blockHeight: nil)
-
-            storage.add(instantTransactionInput: instantInput)
             instantInputs.append(instantInput)
         }
+        // 批量添加到数据库，减少数据库写入操作
+        storage.add(instantTransactionInputs: instantInputs)
         return instantInputs
     }
 }

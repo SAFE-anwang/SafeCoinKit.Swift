@@ -233,8 +233,16 @@ public class Kit: AbstractKit {
 
 extension Kit: BitcoinCoreDelegate {
     public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
-        // check for all new transactions if it's has instant lock
-        inserted.compactMap(\.transactionHash.hs.hexData).forEach { instantSend?.handle(insertedTxHash: $0) }
+        // 批量处理新插入的交易，减少重复操作
+        if !inserted.isEmpty {
+            let txHashes = inserted.compactMap(\.transactionHash.hs.hexData)
+            // 异步处理交易锁定检查，避免阻塞主线程
+            DispatchQueue.global().async {
+                txHashes.forEach { [weak self] in
+                    self?.instantSend?.handle(insertedTxHash: $0)
+                }
+            }
+        }
 
         delegate?.transactionsUpdated(inserted: cast(transactionInfos: inserted), updated: cast(transactionInfos: updated))
     }
@@ -258,13 +266,16 @@ extension Kit: BitcoinCoreDelegate {
 
 extension Kit: IInstantTransactionDelegate {
     public func onUpdateInstant(transactionHash: Data) {
-        guard let transaction = storage.transactionFullInfo(byHash: transactionHash) else {
-            return
-        }
-        let transactionInfo = dashTransactionInfoConverter.transactionInfo(fromTransaction: transaction)
-        bitcoinCore.delegateQueue.async { [weak self] in
-            if let kit = self {
-                kit.delegate?.transactionsUpdated(inserted: [], updated: kit.cast(transactionInfos: [transactionInfo]))
+        // 异步执行数据库操作，避免阻塞主线程
+        DispatchQueue.global().async {
+            guard let transaction = self.storage.transactionFullInfo(byHash: transactionHash) else {
+                return
+            }
+            let transactionInfo = self.dashTransactionInfoConverter.transactionInfo(fromTransaction: transaction)
+            self.bitcoinCore.delegateQueue.async { [weak self] in
+                if let kit = self {
+                    kit.delegate?.transactionsUpdated(inserted: [], updated: kit.cast(transactionInfos: [transactionInfo]))
+                }
             }
         }
     }
