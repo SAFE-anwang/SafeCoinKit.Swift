@@ -88,12 +88,26 @@ class DashGrdbStorage: GrdbStorage {
 extension DashGrdbStorage: IDashStorage {
     var masternodes: [Masternode] {
         get {
-            try! dbPool.read { db in
-                try Masternode.fetchAll(db)
+            let semaphore = DispatchSemaphore(value: 0)
+            var result: [Masternode] = []
+            
+            DispatchQueue.global(qos: .background).async {
+                do {
+                    result = try self.dbPool.read { db in
+                        try Masternode.fetchAll(db)
+                    }
+                } catch {
+                    // 记录错误但不抛出，保持向后兼容
+                    print("Error reading masternodes: \(error)")
+                }
+                semaphore.signal()
             }
+            
+            semaphore.wait()
+            return result
         }
         set {
-            DispatchQueue.global().async {
+            DispatchQueue.global(qos: .background).async {
                 _ = try? self.dbPool.write { db in
                     try Masternode.deleteAll(db)
                     try newValue.forEach { try $0.insert(db) }
@@ -104,12 +118,25 @@ extension DashGrdbStorage: IDashStorage {
 
     var quorums: [Quorum] {
         get {
-            try! dbPool.read { db in
-                try Quorum.fetchAll(db)
+            let semaphore = DispatchSemaphore(value: 0)
+            var result: [Quorum] = []
+            
+            DispatchQueue.global(qos: .background).async {
+                do {
+                    result = try self.dbPool.read { db in
+                        try Quorum.fetchAll(db)
+                    }
+                } catch {
+                    print("Error reading quorums: \(error)")
+                }
+                semaphore.signal()
             }
+            
+            semaphore.wait()
+            return result
         }
         set {
-            DispatchQueue.global().async {
+            DispatchQueue.global(qos: .background).async {
                 _ = try? self.dbPool.write { db in
                     try Quorum.deleteAll(db)
                     try newValue.forEach { try $0.insert(db) }
@@ -120,12 +147,25 @@ extension DashGrdbStorage: IDashStorage {
 
     var masternodeListState: MasternodeListState? {
         get {
-            try! dbPool.read { db in
-                try MasternodeListState.fetchOne(db)
+            let semaphore = DispatchSemaphore(value: 0)
+            var result: MasternodeListState? = nil
+            
+            DispatchQueue.global(qos: .background).async {
+                do {
+                    result = try self.dbPool.read { db in
+                        try MasternodeListState.fetchOne(db)
+                    }
+                } catch {
+                    print("Error reading masternodeListState: \(error)")
+                }
+                semaphore.signal()
             }
+            
+            semaphore.wait()
+            return result
         }
         set {
-            DispatchQueue.global().async {
+            DispatchQueue.global(qos: .background).async {
                 guard let newValue else {
                     _ = try? self.dbPool.write { db in
                         try MasternodeListState.deleteAll(db)
@@ -140,19 +180,45 @@ extension DashGrdbStorage: IDashStorage {
     }
 
     func quorums(by type: QuorumType) -> [Quorum] {
-        try! dbPool.read { db in
-            try Quorum.filter(Quorum.Columns.type == type.rawValue).fetchAll(db)
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: [Quorum] = []
+        
+        DispatchQueue.global(qos: .background).async {
+            do {
+                result = try self.dbPool.read { db in
+                    try Quorum.filter(Quorum.Columns.type == type.rawValue).fetchAll(db)
+                }
+            } catch {
+                print("Error reading quorums by type: \(error)")
+            }
+            semaphore.signal()
         }
+        
+        semaphore.wait()
+        return result
     }
 
     func instantTransactionHashes() -> [Data] {
-        try! dbPool.read { db in
-            try InstantTransactionHash.fetchAll(db).map(\.txHash)
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: [Data] = []
+        
+        DispatchQueue.global(qos: .background).async {
+            do {
+                result = try self.dbPool.read { db in
+                    try InstantTransactionHash.fetchAll(db).map(\.txHash)
+                }
+            } catch {
+                print("Error reading instantTransactionHashes: \(error)")
+            }
+            semaphore.signal()
         }
+        
+        semaphore.wait()
+        return result
     }
 
     func add(instantTransactionHash: Data) {
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .background).async {
             _ = try? self.dbPool.write { db in
                 try InstantTransactionHash(txHash: instantTransactionHash).insert(db)
             }
@@ -160,7 +226,7 @@ extension DashGrdbStorage: IDashStorage {
     }
 
     func add(instantTransactionInput: InstantTransactionInput) {
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .background).async {
             _ = try? self.dbPool.write { db in
                 try instantTransactionInput.insert(db)
             }
@@ -168,7 +234,7 @@ extension DashGrdbStorage: IDashStorage {
     }
 
     func add(instantTransactionInputs: [InstantTransactionInput]) {
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .background).async {
             _ = try? self.dbPool.write { db in
                 for input in instantTransactionInputs {
                     try input.insert(db)
@@ -178,7 +244,7 @@ extension DashGrdbStorage: IDashStorage {
     }
 
     func removeInstantTransactionInputs(for txHash: Data) {
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .background).async {
             _ = try? self.dbPool.write { db in
                 try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).deleteAll(db)
             }
@@ -186,14 +252,40 @@ extension DashGrdbStorage: IDashStorage {
     }
 
     func instantTransactionInputs(for txHash: Data) -> [InstantTransactionInput] {
-        try! dbPool.read { db in
-            try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).fetchAll(db)
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: [InstantTransactionInput] = []
+        
+        DispatchQueue.global(qos: .background).async {
+            do {
+                result = try self.dbPool.read { db in
+                    try InstantTransactionInput.filter(InstantTransactionInput.Columns.txHash == txHash).fetchAll(db)
+                }
+            } catch {
+                print("Error reading instantTransactionInputs: \(error)")
+            }
+            semaphore.signal()
         }
+        
+        semaphore.wait()
+        return result
     }
 
     func instantTransactionInput(for inputTxHash: Data) -> InstantTransactionInput? {
-        try! dbPool.read { db in
-            try InstantTransactionInput.filter(InstantTransactionInput.Columns.inputTxHash == inputTxHash).fetchOne(db)
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: InstantTransactionInput? = nil
+        
+        DispatchQueue.global(qos: .background).async {
+            do {
+                result = try self.dbPool.read { db in
+                    try InstantTransactionInput.filter(InstantTransactionInput.Columns.inputTxHash == inputTxHash).fetchOne(db)
+                }
+            } catch {
+                print("Error reading instantTransactionInput: \(error)")
+            }
+            semaphore.signal()
         }
+        
+        semaphore.wait()
+        return result
     }
 }

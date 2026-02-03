@@ -236,31 +236,43 @@ extension Kit: BitcoinCoreDelegate {
         // 批量处理新插入的交易，减少重复操作
         if !inserted.isEmpty {
             let txHashes = inserted.compactMap(\.transactionHash.hs.hexData)
-            // 异步处理交易锁定检查，避免阻塞主线程
-            DispatchQueue.global().async {
-                txHashes.forEach { [weak self] in
-                    self?.instantSend?.handle(insertedTxHash: $0)
+            // 使用后台线程异步处理交易锁定检查，避免阻塞主线程
+            DispatchQueue.global(qos: .background).async {
+                // 批量处理交易，减少线程切换开销
+                txHashes.forEach { [weak self] txHash in
+                    self?.instantSend?.handle(insertedTxHash: txHash)
                 }
             }
         }
 
-        delegate?.transactionsUpdated(inserted: cast(transactionInfos: inserted), updated: cast(transactionInfos: updated))
+        // 确保在适当的线程上通知代理，避免线程安全问题
+        DispatchQueue.main.async {
+            self.delegate?.transactionsUpdated(inserted: self.cast(transactionInfos: inserted), updated: self.cast(transactionInfos: updated))
+        }
     }
 
     public func transactionsDeleted(hashes: [String]) {
-        delegate?.transactionsDeleted(hashes: hashes)
+        DispatchQueue.main.async {
+            self.delegate?.transactionsDeleted(hashes: hashes)
+        }
     }
 
     public func balanceUpdated(balance: BalanceInfo) {
-        delegate?.balanceUpdated(balance: balance)
+        DispatchQueue.main.async {
+            self.delegate?.balanceUpdated(balance: balance)
+        }
     }
 
     public func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        delegate?.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo)
+        DispatchQueue.main.async {
+            self.delegate?.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo)
+        }
     }
 
     public func kitStateUpdated(state: BitcoinCore.KitState) {
-        delegate?.kitStateUpdated(state: state)
+        DispatchQueue.main.async {
+            self.delegate?.kitStateUpdated(state: state)
+        }
     }
 }
 
