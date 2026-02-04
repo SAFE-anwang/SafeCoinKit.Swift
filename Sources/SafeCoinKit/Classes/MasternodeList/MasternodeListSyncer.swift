@@ -13,7 +13,7 @@ class MasternodeListSyncer: IMasternodeListSyncer {
     private let queue: DispatchQueue
 
     init(bitcoinCore: BitcoinCore, initialBlockDownload: IInitialDownload, peerTaskFactory: IPeerTaskFactory, masternodeListManager: IMasternodeListManager,
-         queue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.dash-kit.masternode-list-syncer", qos: .background))
+         queue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.safe-kit.masternode-list-syncer", qos: .userInitiated))
     {
         self.bitcoinCore = bitcoinCore
         self.initialBlockDownload = initialBlockDownload
