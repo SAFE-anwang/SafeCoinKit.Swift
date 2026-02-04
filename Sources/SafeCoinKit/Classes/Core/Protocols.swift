@@ -49,7 +49,7 @@ protocol IDashPeer: IPeer {
 
 // ###############################
 
-public protocol SafeCoinKitDelegate: AnyObject {
+public protocol DashKitDelegate: AnyObject {
     func transactionsUpdated(inserted: [DashTransactionInfo], updated: [DashTransactionInfo])
     func transactionsDeleted(hashes: [String])
     func balanceUpdated(balance: BalanceInfo)

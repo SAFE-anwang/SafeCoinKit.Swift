@@ -23,7 +23,7 @@ public class Kit: AbstractKit {
         }
     }
 
-    public weak var delegate: SafeCoinKitDelegate?
+    public weak var delegate: DashKitDelegate?
 
     private let storage: IDashStorage
     public var safeMainNet: INetwork?
@@ -105,7 +105,7 @@ public class Kit: AbstractKit {
             .set(paymentAddressParser: paymentAddressParser)
             .set(walletId: walletId)
             .set(confirmationsThreshold: confirmationsThreshold)
-            .set(peerSize: 10)
+            .set(peerSize: 4)
             .set(storage: storage)
             .set(syncMode: syncMode)
             .set(blockHeaderHasher: x11Hasher)

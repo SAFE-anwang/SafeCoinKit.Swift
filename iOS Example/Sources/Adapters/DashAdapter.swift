@@ -5,7 +5,7 @@ import Foundation
 import HdWalletKit
 import HsToolKit
 
-class DashAdapter: BaseAdapter, SafeCoinKitDelegate {
+class DashAdapter: BaseAdapter {
     override var feeRate: Int { 1 }
     private let dashKit: Kit
     private let coinRate: Decimal = pow(10, 8)
@@ -20,7 +20,7 @@ class DashAdapter: BaseAdapter, SafeCoinKitDelegate {
     }
 
     override func transactions(fromUid: String?, type: TransactionFilterType? = nil, limit: Int) -> [TransactionRecord] {
-        dashKit.transactions(fromUid: fromUid, type: type, descending: <#Bool#>, limit: limit)
+        dashKit.transactions(fromUid: fromUid, type: type, descending: true, limit: limit)
             .compactMap {
                 transactionRecord(fromTransaction: $0)
             }
@@ -40,7 +40,7 @@ class DashAdapter: BaseAdapter, SafeCoinKitDelegate {
     }
 }
 
-extension DashAdapter: SafeCoinKitDelegate {
+extension DashAdapter: DashKitDelegate {
     public func transactionsUpdated(inserted _: [DashTransactionInfo], updated _: [DashTransactionInfo]) {
         transactionsSubject.send()
     }

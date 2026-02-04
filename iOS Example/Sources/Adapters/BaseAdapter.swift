@@ -69,7 +69,7 @@ class BaseAdapter {
     }
 
     func transactions(fromUid: String?, type: TransactionFilterType? = nil, limit: Int) -> [TransactionRecord] {
-        abstractKit.transactions(fromUid: fromUid, type: type, limit: limit)
+        abstractKit.transactions(fromUid: fromUid, type: type, descending: true, limit: limit)
             .compactMap {
                 transactionRecord(fromTransaction: $0)
             }
@@ -137,12 +137,12 @@ extension BaseAdapter {
 
     func send(to address: String, amount: Decimal, sortType: TransactionDataSortType, pluginData: [UInt8: IPluginData] = [:]) throws {
         let satoshiAmount = convertToSatoshi(value: amount)
-        _ = try abstractKit.send(to: address, value: satoshiAmount, feeRate: feeRate, sortType: sortType, pluginData: pluginData)
+//        _ = try abstractKit.send(to: address, value: satoshiAmount, feeRate: feeRate, sortType: sortType, pluginData: pluginData)
     }
 
     func availableBalance(for address: String?, pluginData: [UInt8: IPluginData] = [:]) -> Decimal {
-        let amount = (try? abstractKit.maxSpendableValue(toAddress: address, feeRate: feeRate, pluginData: pluginData)) ?? 0
-        return Decimal(amount) / coinRate
+//        let amount = (try? abstractKit.maxSpendableValue(toAddress: address, feeRate: feeRate, pluginData: pluginData)) ?? 0
+        return  0//Decimal(amount) / coinRate
     }
 
     func maxSpendLimit(pluginData: [UInt8: IPluginData]) -> Int? {
@@ -154,17 +154,18 @@ extension BaseAdapter {
     }
 
     func minSpendableAmount(for address: String?) -> Decimal {
-        Decimal((try? abstractKit.minSpendableValue(toAddress: address)) ?? 0) / coinRate
+//        Decimal((try? abstractKit.minSpendableValue(toAddress: address)) ?? 0) / coinRate
+        0
     }
 
     func fee(for value: Decimal, address: String?, pluginData: [UInt8: IPluginData] = [:]) -> Decimal {
-        do {
-            let amount = convertToSatoshi(value: value)
-            let fee = try abstractKit.fee(for: amount, toAddress: address, feeRate: feeRate, pluginData: pluginData)
-            return Decimal(fee) / coinRate
-        } catch {
+//        do {
+//            let amount = convertToSatoshi(value: value)
+//            let fee = try abstractKit.fee(for: amount, toAddress: address, feeRate: feeRate, pluginData: pluginData)
+//            return Decimal(fee) / coinRate
+//        } catch {
             return 0
-        }
+//        }
     }
 
     func printDebugs() {
