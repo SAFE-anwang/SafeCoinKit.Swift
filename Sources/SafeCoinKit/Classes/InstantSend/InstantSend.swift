@@ -7,24 +7,23 @@ enum DashInventoryType: Int32 { case msgTxLockRequest = 4, msgTxLockVote = 5, ms
 class InstantSend {
     static let requiredVoteCount = 6
 
+    let dispatchQueue: DispatchQueue
     private let transactionSyncer: IDashTransactionSyncer
     private let transactionLockVoteHandler: ITransactionLockVoteHandler
     private let instantSendLockHandler: IInstantSendLockHandler
     private let logger: Logger?
 
-    init(transactionSyncer: IDashTransactionSyncer, transactionLockVoteHandler: ITransactionLockVoteHandler, instantSendLockHandler: IInstantSendLockHandler, logger: Logger? = nil) {
+    init(transactionSyncer: IDashTransactionSyncer, transactionLockVoteHandler: ITransactionLockVoteHandler, instantSendLockHandler: IInstantSendLockHandler, dispatchQueue: DispatchQueue = DispatchQueue(label: "io.horizontalsystems.dash-kit.instant-send", qos: .userInitiated), logger: Logger? = nil) {
         self.transactionSyncer = transactionSyncer
         self.transactionLockVoteHandler = transactionLockVoteHandler
         self.instantSendLockHandler = instantSendLockHandler
 
+        self.dispatchQueue = dispatchQueue
         self.logger = logger
     }
 
     public func handle(insertedTxHash: Data) {
-        // 使用 Task 异步处理，避免阻塞调用线程
-        Task.detached {
-            self.instantSendLockHandler.handle(transactionHash: insertedTxHash)
-        }
+        instantSendLockHandler.handle(transactionHash: insertedTxHash)
     }
 }
 
@@ -32,21 +31,20 @@ extension InstantSend: IPeerTaskHandler {
     public func handleCompletedTask(peer _: IPeer, task: PeerTask) -> Bool {
         switch task {
         case let task as RequestTransactionLockRequestsTask:
-            // 使用 Task.detached 处理，避免阻塞事件循环
-            Task.detached {
+            dispatchQueue.async {
                 self.handle(transactions: task.transactions)
             }
             return true
 
         case let task as RequestTransactionLockVotesTask:
-            Task.detached {
+            dispatchQueue.async {
                 self.handle(transactionLockVotes: task.transactionLockVotes)
             }
             return true
 
         case let task as RequestLlmqInstantLocksTask:
-            Task.detached {
-                self.handle(llmqInstantSendLocks: task.llmqInstantLocks)
+            dispatchQueue.async {
+                self.handle(llmqInstantSendLocks: task.llmqInstantSendLocks)
             }
             return true
 

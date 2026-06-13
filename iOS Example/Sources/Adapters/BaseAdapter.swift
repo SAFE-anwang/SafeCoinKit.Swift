@@ -69,7 +69,7 @@ class BaseAdapter {
     }
 
     func transactions(fromUid: String?, type: TransactionFilterType? = nil, limit: Int) -> [TransactionRecord] {
-        abstractKit.transactions(fromUid: fromUid, type: type, limit: limit)
+        abstractKit.transactions(fromUid: fromUid, type: type, descending: true, limit: limit)
             .compactMap {
                 transactionRecord(fromTransaction: $0)
             }

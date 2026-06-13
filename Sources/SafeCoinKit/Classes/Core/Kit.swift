@@ -233,61 +233,39 @@ public class Kit: AbstractKit {
 
 extension Kit: BitcoinCoreDelegate {
     public func transactionsUpdated(inserted: [TransactionInfo], updated: [TransactionInfo]) {
-        // 批量处理新插入的交易，减少重复操作
-        if !inserted.isEmpty {
-            let txHashes = inserted.compactMap(\.transactionHash.hs.hexData)
-            // 使用后台线程异步处理交易锁定检查，避免阻塞主线程
-            DispatchQueue.global(qos: .background).async {
-                // 批量处理交易，减少线程切换开销
-                txHashes.forEach { [weak self] txHash in
-                    self?.instantSend?.handle(insertedTxHash: txHash)
-                }
-            }
-        }
+        // check for all new transactions if it's has instant lock
+        inserted.compactMap(\.transactionHash.hs.hexData).forEach { instantSend?.handle(insertedTxHash: $0) }
 
-        // 确保在适当的线程上通知代理，避免线程安全问题
-        DispatchQueue.main.async {
-            self.delegate?.transactionsUpdated(inserted: self.cast(transactionInfos: inserted), updated: self.cast(transactionInfos: updated))
-        }
+        delegate?.transactionsUpdated(inserted: cast(transactionInfos: inserted), updated: cast(transactionInfos: updated))
     }
 
     public func transactionsDeleted(hashes: [String]) {
-        DispatchQueue.main.async {
-            self.delegate?.transactionsDeleted(hashes: hashes)
-        }
+        delegate?.transactionsDeleted(hashes: hashes)
     }
 
     public func balanceUpdated(balance: BalanceInfo) {
-        DispatchQueue.main.async {
-            self.delegate?.balanceUpdated(balance: balance)
-        }
+        delegate?.balanceUpdated(balance: balance)
     }
 
     public func lastBlockInfoUpdated(lastBlockInfo: BlockInfo) {
-        DispatchQueue.main.async {
-            self.delegate?.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo)
-        }
+        delegate?.lastBlockInfoUpdated(lastBlockInfo: lastBlockInfo)
     }
 
     public func kitStateUpdated(state: BitcoinCore.KitState) {
-        DispatchQueue.main.async {
-            self.delegate?.kitStateUpdated(state: state)
-        }
+        delegate?.kitStateUpdated(state: state)
     }
 }
 
 extension Kit: IInstantTransactionDelegate {
     public func onUpdateInstant(transactionHash: Data) {
-        // 异步执行数据库操作，避免阻塞主线程
-        DispatchQueue.global().async {
-            guard let transaction = self.storage.transactionFullInfo(byHash: transactionHash) else {
-                return
-            }
-            let transactionInfo = self.dashTransactionInfoConverter.transactionInfo(fromTransaction: transaction)
-            self.bitcoinCore.delegateQueue.async { [weak self] in
-                if let kit = self {
-                    kit.delegate?.transactionsUpdated(inserted: [], updated: kit.cast(transactionInfos: [transactionInfo]))
-                }
+        guard let transaction = storage.transactionFullInfo(byHash: transactionHash) else {
+            return
+        }
+        let transactionInfo = dashTransactionInfoConverter.transactionInfo(fromTransaction: transaction)
+
+        bitcoinCore.delegateQueue.async { [weak self] in
+            if let kit = self {
+                kit.delegate?.transactionsUpdated(inserted: [], updated: kit.cast(transactionInfos: [transactionInfo]))
             }
         }
     }
