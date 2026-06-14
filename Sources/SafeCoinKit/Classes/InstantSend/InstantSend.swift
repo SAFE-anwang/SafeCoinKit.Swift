@@ -23,7 +23,14 @@ class InstantSend {
     }
 
     public func handle(insertedTxHash: Data) {
-        instantSendLockHandler.handle(transactionHash: insertedTxHash)
+        // Route the relayed-lock check through dispatchQueue to:
+        // 1) Offload the sync DB reads/writes + BLS verify off BitcoinCore.delegateQueue
+        //    (avoids stalling the sync pipeline when a batch of relayed-locked tx is inserted).
+        // 2) Serialize all access to InstantSendLockManager.relayedLocks on a single thread,
+        //    removing the cross-thread dictionary mutation hazard.
+        dispatchQueue.async { [weak self] in
+            self?.instantSendLockHandler.handle(transactionHash: insertedTxHash)
+        }
     }
 }
 
@@ -44,7 +51,7 @@ extension InstantSend: IPeerTaskHandler {
 
         case let task as RequestLlmqInstantLocksTask:
             dispatchQueue.async {
-                self.handle(llmqInstantSendLocks: task.llmqInstantSendLocks)
+                self.handle(llmqInstantLocks: task.llmqInstantLocks)
             }
             return true
 
@@ -66,8 +73,8 @@ extension InstantSend: IPeerTaskHandler {
         }
     }
 
-    private func handle(llmqInstantSendLocks: [ISLockMessage]) {
-        for isLock in llmqInstantSendLocks {
+    private func handle(llmqInstantLocks: [ISLockMessage]) {
+        for isLock in llmqInstantLocks {
             instantSendLockHandler.handle(isLock: isLock)
         }
     }

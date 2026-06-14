@@ -46,11 +46,11 @@ class MainSafeNetService {
                 guard let self = self else { return }
                 
                 do {
-                    async let fetchTask = self.networkManager.fetchJson(url: "\(self.baseUrl)/insight-api-safe/utils/address/seed")
+                    let url = "\(self.baseUrl)/insight-api-safe/utils/address/seed"
                     let result = try await self.withTimeout(seconds: self.timeoutInterval) {
-                        try await fetchTask
+                        try await self.networkManager.fetchJson(url: url)
                     }
-                    
+
                     guard let json = result as? [String] else { return }
                     self.handle(datas: json)
                 } catch {

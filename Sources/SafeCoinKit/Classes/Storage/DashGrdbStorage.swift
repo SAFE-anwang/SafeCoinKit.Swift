@@ -93,9 +93,18 @@ extension DashGrdbStorage: IDashStorage {
             }
         }
         set {
-            _ = try? dbPool.write { db in
-                try Masternode.deleteAll(db)
-                try newValue.forEach { try $0.insert(db) }
+            // Fire-and-forget: a full masternode list (1000+ rows) replace can take
+            // hundreds of ms to seconds; dispatching to background keeps the caller
+            // (e.g. peer event thread) responsive. Safe because:
+            //  - Each individual read+write is serialized by GRDB's dbPool.
+            //  - Stale-readers of masternodes always observe a consistent snapshot
+            //    because they read within a single dbPool.read.
+            //  - In-flight stale writes are harmless: the next diff will overwrite.
+            DispatchQueue.global(qos: .background).async {
+                _ = try? self.dbPool.write { db in
+                    try Masternode.deleteAll(db)
+                    try newValue.forEach { try $0.insert(db) }
+                }
             }
         }
     }
@@ -107,9 +116,11 @@ extension DashGrdbStorage: IDashStorage {
             }
         }
         set {
-            _ = try? dbPool.write { db in
-                try Quorum.deleteAll(db)
-                try newValue.forEach { try $0.insert(db) }
+            DispatchQueue.global(qos: .background).async {
+                _ = try? self.dbPool.write { db in
+                    try Quorum.deleteAll(db)
+                    try newValue.forEach { try $0.insert(db) }
+                }
             }
         }
     }
@@ -121,14 +132,16 @@ extension DashGrdbStorage: IDashStorage {
             }
         }
         set {
-            guard let newValue else {
-                _ = try? dbPool.write { db in
-                    try MasternodeListState.deleteAll(db)
+            DispatchQueue.global(qos: .background).async {
+                guard let newValue else {
+                    _ = try? self.dbPool.write { db in
+                        try MasternodeListState.deleteAll(db)
+                    }
+                    return
                 }
-                return
-            }
-            _ = try? dbPool.write { db in
-                try newValue.insert(db)
+                _ = try? self.dbPool.write { db in
+                    try newValue.insert(db)
+                }
             }
         }
     }

@@ -14,6 +14,21 @@ class MasternodeListDiffMessageParser: IMessageParser {
     }
 
     func parse(data: Data) -> IMessage {
+        // Defer the heavy parse (1000+ masternode + 100+ quorum SHA256 chains,
+        // thousands of allocations) off the peer event thread. Only the 64-byte
+        // header is read eagerly inside the envelope, so request matching still
+        // works on the peer event thread. The full parse runs on first
+        // access of `.value`, which the syncer dispatches to `processingQueue`.
+        return MasternodeListDiffMessageEnvelope(rawData: data) { rawData in
+            Self.parseFull(
+                masternodeParser: self.masternodeParser,
+                quorumParser: self.quorumParser,
+                data: rawData
+            )
+        }
+    }
+
+    private static func parseFull(masternodeParser: IMasternodeParser, quorumParser: IQuorumParser, data: Data) -> MasternodeListDiffMessage {
         let byteStream = ByteStream(data)
 
         let baseBlockHash = byteStream.read(Data.self, count: 32)
