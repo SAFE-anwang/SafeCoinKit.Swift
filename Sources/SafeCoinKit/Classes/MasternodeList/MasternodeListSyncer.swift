@@ -82,10 +82,17 @@ extension MasternodeListSyncer {
 
 extension MasternodeListSyncer {
     private func onPeerDisconnect(peer: IPeer, error _: Error?) {
-        if peer.equalTo(workingPeer) {
-            workingPeer = nil
-
-            assignNextSyncPeer()
+        // The peer-group publisher emits on BitcoinCore's internal queue, which
+        // is not the same serial queue we use to gate workingPeer access. Read
+        // and write workingPeer on `queue` so the read in `assignNextSyncPeer`
+        // and the write here are serialized, and so we don't touch peer-syncer
+        // state from a thread the rest of the syncer does not own.
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            if peer.equalTo(self.workingPeer) {
+                self.workingPeer = nil
+                self.assignNextSyncPeer()
+            }
         }
     }
 }
